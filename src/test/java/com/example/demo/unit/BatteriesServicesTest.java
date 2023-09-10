@@ -1,6 +1,5 @@
 package com.example.demo.unit;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import com.example.demo.entity.Batteries;
 import com.example.demo.entity.PostCodeRangeResponse;
 import com.example.demo.repository.BatteriesRepository;
@@ -16,11 +15,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
-@RunWith(SpringRunner.class) // This is for JUnit 4. For JUnit 5, you won't need this.
+
+@RunWith(SpringRunner.class)
 @SpringBootTest
-public class BatteriesServicesTest { // Replace 'YourServiceClass' with the actual name of the service class.
+public class BatteriesServicesTest {
 
     @Autowired
     private BatteriesServices service;
@@ -30,28 +31,11 @@ public class BatteriesServicesTest { // Replace 'YourServiceClass' with the actu
 
     @Before
     public void setUp() {
-        Batteries battery1 = new Batteries();
-        battery1.setId(1);
-        battery1.setName("Test1");
-        battery1.setPostCode(1L);
-        battery1.setCapacity(1);
-        battery1.setCapacityType("WATT");
-
-        Batteries battery2 = new Batteries();
-        battery2.setId(2);
-        battery2.setName("Test2");
-        battery2.setPostCode(2L);
-        battery2.setCapacity(2);
-        battery2.setCapacityType("WATT");
-
-        Batteries battery3 = new Batteries();
-        battery3.setId(3);
-        battery3.setName("Test3");
-        battery3.setPostCode(3L);
-        battery3.setCapacity(120);
-        battery3.setCapacityType("WATT");
-
-        List<Batteries> mockData = Arrays.asList(battery1, battery2, battery3);
+        List<Batteries> mockData = Arrays.asList(
+                createBattery(1, "Test1", 1L, 1, "WATT"),
+                createBattery(2, "Test2", 2L, 2, "WATT"),
+                createBattery(3, "Test3", 3L, 120, "WATT")
+        );
 
         when(batteriesRepository.findByPostCodeBetween(1, 3)).thenReturn(mockData);
     }
@@ -64,13 +48,20 @@ public class BatteriesServicesTest { // Replace 'YourServiceClass' with the actu
 
     @Test
     public void getBatteriesByPostCodeRangeTest() {
-        int minPostCode = 1;
-        int maxPostCode = 3;
-        PostCodeRangeResponse response = service.getBatteriesByPostCodeRange(minPostCode, maxPostCode);
+        PostCodeRangeResponse response = service.getBatteriesByPostCodeRange(1, 3);
 
         assertThat(response.getBatteryNames()).containsExactly("Test1", "Test2", "Test3");
         assertThat(response.getTotalWattCapacity()).isEqualTo(123.0);
         assertThat(response.getAverageWattCapacity()).isEqualTo(41.0);
     }
 
+    private Batteries createBattery(int id, String name, long postCode, int capacity, String capacityType) {
+        Batteries battery = new Batteries();
+        battery.setId(id);
+        battery.setName(name);
+        battery.setPostCode(postCode);
+        battery.setCapacity(capacity);
+        battery.setCapacityType(capacityType);
+        return battery;
+    }
 }
